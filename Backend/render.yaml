@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: arivora-ai-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run_server.py
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000
+    autoDeploy: true

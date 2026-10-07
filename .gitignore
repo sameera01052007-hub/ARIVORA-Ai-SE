@@ -1,0 +1,34 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment files
+.env
+Backend/.env
+.venv
+env/
+venv/
+ENV/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# User data generated at runtime (keep directories with .gitkeep)
+Backend/data/uploads/*
+!Backend/data/uploads/.gitkeep
+Backend/data/indexes/*
+!Backend/data/indexes/.gitkeep
+Backend/data/voice_notes/*
+!Backend/data/voice_notes/.gitkeep
+Backend/data/timetable/*
+!Backend/data/timetable/.gitkeep
+
+# PDF documents
+*.pdf
+
+# IDEs
+.vscode/
+.idea/

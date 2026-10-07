@@ -1,0 +1,8 @@
+{'exam_name': 'Computer Networks (CS8591)', 'exam_date': '2026-11-20', 'subject': 'General', 'username': 'Student', 'created_at': '2026-09-11T09:48:56.959215'}
+{'exam_name': 'Computer Networks (CS8591)', 'exam_date': '2026-11-20', 'subject': 'General', 'username': 'Student', 'created_at': '2026-09-11T09:48:58.095416'}
+{'exam_name': 'Computer Networks (CS8591)', 'exam_date': '2026-11-20', 'subject': 'General', 'username': 'Student', 'created_at': '2026-09-11T10:26:26.916151'}
+{'exam_name': 'Computer Networks (CS8591)', 'exam_date': '2026-11-21', 'subject': 'Computer Networks', 'username': 'Sam', 'created_at': '2026-10-05T22:47:00.309196'}
+{'exam_name': 'Operating System', 'exam_date': '2026-11-21', 'subject': 'Computer Networks', 'username': 'Sam', 'created_at': '2026-10-05T22:47:46.162031'}
+{'exam_name': 'Computer Networks ', 'exam_date': '2026-11-12', 'subject': 'DBMS', 'username': 'Student', 'created_at': '2026-10-06T19:13:52.254026'}
+{'exam_name': 'Computer Networks (CS8591)', 'exam_date': '2026-11-20', 'subject': 'DBMS', 'username': 'Student', 'created_at': '2026-10-07T11:48:15.256781'}
+{'exam_name': 'Computer Networks (CS8591)', 'exam_date': '2026-11-20', 'subject': 'Data Structures', 'username': 'Student', 'created_at': '2026-10-07T15:23:25.454477'}
