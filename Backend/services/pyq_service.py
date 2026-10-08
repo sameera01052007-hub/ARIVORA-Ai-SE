@@ -284,7 +284,18 @@ class PYQService:
         import re
         import html
 
-        search_terms = f"{board} Class {class_level} {subject} previous year question paper {year or ''} {medium} {query}".strip()
+        lvl_clean = str(class_level).strip()
+        if lvl_clean.isdigit():
+            lvl_str = f"Class {lvl_clean}"
+        elif lvl_clean.lower() in ["college", "university", "faculty", "all"]:
+            lvl_str = ""
+        elif lvl_clean.lower().startswith("class"):
+            lvl_str = lvl_clean
+        else:
+            lvl_str = lvl_clean
+
+        raw_terms = f"{board} {lvl_str} {subject} previous year question paper {year or ''} {medium} {query}".strip()
+        search_terms = re.sub(r'\s+', ' ', raw_terms)
         search_url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote(search_terms)}"
 
         headers = {
