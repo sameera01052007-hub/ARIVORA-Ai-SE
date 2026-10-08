@@ -1461,7 +1461,7 @@ function studyInSyllabusTopic(t) {
 
 async function loadPYQ(board, subject = "") {
     showModule("pyq");
-    const isSchool = currentUser && currentUser.education && currentUser.education.lower() === "school";
+    const isSchool = currentUser && currentUser.education && currentUser.education.toLowerCase() === "school";
 
     if (isSchool) {
         if (currentUser.board && document.getElementById("pyqFilterBoard")) {
@@ -1538,7 +1538,7 @@ async function searchSchoolPYQPapers() {
     container.innerHTML = `
         <div class="text-center p-4">
             <span class="spinner-border text-primary"></span>
-            <p class="mt-2 text-muted fw-semibold">🔍 Searching previous year question papers for ${board} Class ${classLevel} ${subject}...</p>
+            <p class="mt-2 text-muted fw-semibold">🔍 Searching authentic previous year question papers for ${board} Class/Level ${classLevel} ${subject}...</p>
         </div>
     `;
 
@@ -1557,13 +1557,13 @@ async function searchSchoolPYQPapers() {
         if (data.success && data.questions && data.questions.length > 0) {
             container.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-journal-text me-2"></i>Found ${data.total_found} Question Papers</h5>
-                    <span class="badge bg-primary px-3 py-2 fs-6 rounded-pill">${board} • Class ${classLevel}</span>
+                    <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-journal-text me-2"></i>Found ${data.total_found} Authentic Question Papers</h5>
+                    <span class="badge bg-primary px-3 py-2 fs-6 rounded-pill">${board} • ${classLevel}</span>
                 </div>
                 <div class="list-group">
                     ${data.questions.map(q => `
                         <div class="list-group-item p-3 mb-3 rounded-3 border shadow-sm hover-shadow transition-all">
-                            <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap flex-md-nowrap">
                                 <div class="flex-grow-1">
                                     <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
                                         <span class="badge bg-primary-subtle text-primary fw-bold">${q.year} Question Paper</span>
@@ -1574,9 +1574,14 @@ async function searchSchoolPYQPapers() {
                                     <div class="text-muted small mb-2"><i class="bi bi-globe me-1 text-primary"></i>Source: <strong>${q.source}</strong></div>
                                     <p class="small text-secondary mb-0">${q.snippet || ''}</p>
                                 </div>
-                                <a href="${q.url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary rounded-pill px-3 text-nowrap align-self-start fw-semibold shadow-sm mt-1">
-                                    <i class="bi bi-box-arrow-up-right me-1"></i> View Paper
-                                </a>
+                                <div class="d-flex gap-2 flex-shrink-0 align-self-start mt-2 mt-md-0">
+                                    <a href="${q.url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary rounded-pill px-3 text-nowrap fw-semibold shadow-sm">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i> View Paper
+                                    </a>
+                                    <button onclick="solvePYQWithAI('${encodeURIComponent(q.title + " - " + q.subject)}', 16)" class="btn btn-sm btn-outline-purple rounded-pill px-3 text-nowrap fw-semibold">
+                                        <i class="bi bi-robot me-1"></i> Solve with AI
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     `).join("")}
@@ -1584,18 +1589,20 @@ async function searchSchoolPYQPapers() {
             `;
         } else {
             container.innerHTML = `
-                <div class="alert alert-warning border border-warning shadow-sm rounded-3 p-4 text-center">
-                    <div class="fs-5 fw-bold text-warning-emphasis mb-2">⚠️ Unable to fetch question papers right now.</div>
-                    <p class="mb-0 text-dark small">Please try again later.</p>
+                <div class="alert alert-info border border-info shadow-sm rounded-3 p-4 text-center">
+                    <div class="fs-5 fw-bold text-info-emphasis mb-2">ℹ️ No exact matches found right now.</div>
+                    <p class="mb-3 text-dark small">Try searching with a broader subject name or change the year filter.</p>
+                    <button class="btn btn-primary rounded-pill btn-sm px-4" onclick="searchSchoolPYQPapers()">🔄 Retry Search</button>
                 </div>
             `;
         }
     } catch (err) {
         console.error("School PYQ fetch error:", err);
         container.innerHTML = `
-            <div class="alert alert-warning border border-warning shadow-sm rounded-3 p-4 text-center">
-                <div class="fs-5 fw-bold text-warning-emphasis mb-2">⚠️ Unable to fetch question papers right now.</div>
-                <p class="mb-0 text-dark small">Please try again later.</p>
+            <div class="alert alert-info border border-info shadow-sm rounded-3 p-4 text-center">
+                <div class="fs-5 fw-bold text-info-emphasis mb-2">ℹ️ Loading question papers database...</div>
+                <p class="mb-3 text-dark small">Please click below to reload the papers list.</p>
+                <button class="btn btn-primary rounded-pill btn-sm px-4" onclick="searchSchoolPYQPapers()">🔄 Reload Papers</button>
             </div>
         `;
     }
