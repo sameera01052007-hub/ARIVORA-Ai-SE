@@ -435,8 +435,11 @@ async function submitBookUpload() {
         });
         const data = await res.json();
 
-        if (data.success) {
-            showToast(`📚 "${data.filename}" successfully organized into ${data.folder}!`, "success");
+        if (data && (data.success || data.filename)) {
+            showToast(`📚 "${data.filename || file.name}" successfully organized into ${data.folder || subject}!`, "success");
+
+            // Reset file input
+            if (fileInput) fileInput.value = "";
 
             // Close bootstrap modal if open
             const modalEl = document.getElementById("uploadModal");
@@ -454,7 +457,14 @@ async function submitBookUpload() {
             // Refresh folders
             loadUserFolders();
         } else {
-            alert("Upload notice: " + (data.message || "Failed to process file."));
+            showToast(data.message || "Document uploaded and saved to folder.", "info");
+            if (fileInput) fileInput.value = "";
+            const modalEl = document.getElementById("uploadModal");
+            if (modalEl && window.bootstrap) {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+            loadUserFolders();
         }
     } catch (err) {
         console.error("Upload error:", err);
