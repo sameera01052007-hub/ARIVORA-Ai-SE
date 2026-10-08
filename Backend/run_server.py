@@ -24,7 +24,7 @@ def main():
         reload = True
         port = 8000
         for p in [8000, 8001, 8080, 3001]:
-            if not is_port_in_use(host, p):
+            if not is_port_in_use("127.0.0.1", p):
                 port = p
                 break
             else:
