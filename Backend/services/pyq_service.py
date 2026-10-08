@@ -354,6 +354,41 @@ class PYQService:
         except Exception as e:
             print("[!] School PYQ web search notice:", e)
 
+        # Provider 2 Fallback: Bing HTML search if DDG produced < 3 items
+        if len(papers) < 3:
+            try:
+                bing_url = f"https://www.bing.com/search?q={urllib.parse.quote(search_terms)}"
+                req_bing = urllib.request.Request(bing_url, headers=headers)
+                with urllib.request.urlopen(req_bing, timeout=5) as response_bing:
+                    page_html_bing = response_bing.read().decode('utf-8', errors='ignore')
+                    items = re.findall(r'<li class="b_algo"[^>]*>.*?<h2><a href="([^"]+)"[^>]*>(.*?)</a></h2>(.*?)</li>', page_html_bing, re.DOTALL)
+                    for link, title_raw, rest in items:
+                        if not link.startswith("http") or "bing" in link.lower():
+                            continue
+                        clean_title = html.unescape(re.sub(r'<[^>]+>', '', title_raw)).strip()
+                        domain = urllib.parse.urlparse(link).netloc
+                        snip_match = re.search(r'<p[^>]*>(.*?)</p>', rest, re.DOTALL)
+                        clean_snippet = html.unescape(re.sub(r'<[^>]+>', '', snip_match.group(1))).strip() if snip_match else ""
+                        year_match = re.search(r"\b(202[0-6]|201[89])\b", clean_title)
+                        item_year = int(year_match.group(1)) if year_match else (year or 2025)
+                        
+                        papers.append({
+                            "id": f"SCHOOL-PYQ-BING-{len(papers)+1}",
+                            "title": clean_title,
+                            "source": domain,
+                            "url": link,
+                            "board": board,
+                            "class_level": class_level,
+                            "subject": subject,
+                            "year": item_year,
+                            "medium": medium,
+                            "snippet": clean_snippet[:250] or f"Previous year question paper for {board} {class_level} {subject}."
+                        })
+                        if len(papers) >= 10:
+                            break
+            except Exception as e_bing:
+                print("[!] Bing PYQ search notice:", e_bing)
+
         if not papers:
             # Robust fallback: Generate curated past year & model question paper records for requested board/subject
             target_years = [year] if year else [2025, 2024, 2023, 2022, 2021]

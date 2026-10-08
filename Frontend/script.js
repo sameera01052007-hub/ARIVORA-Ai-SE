@@ -1437,64 +1437,24 @@ function studyInSyllabusTopic(t) {
    6. PREVIOUS YEAR QUESTIONS (PYQ)
 ========================================================= */
 
-async function loadPYQ(board, subject = "") {
+async function loadPYQ(board = "", subject = "") {
     showModule("pyq");
-    const isSchool = currentUser && currentUser.education && currentUser.education.toLowerCase() === "school";
 
-    if (isSchool) {
-        if (currentUser.board && document.getElementById("pyqFilterBoard")) {
-            document.getElementById("pyqFilterBoard").value = currentUser.board;
-        }
-        if (currentUser.class_level && document.getElementById("pyqFilterClass")) {
-            document.getElementById("pyqFilterClass").value = currentUser.class_level;
-        }
-        if (subject && document.getElementById("pyqFilterSubject")) {
-            document.getElementById("pyqFilterSubject").value = subject;
-        }
-        await searchSchoolPYQPapers();
-        return;
+    const activeBoard = board || (currentUser && currentUser.board) || "Anna University";
+    const activeSubject = subject || (currentUser && currentUser.subject) || "Mathematics";
+
+    const boardEl = document.getElementById("pyqFilterBoard");
+    const subjectEl = document.getElementById("pyqFilterSubject");
+    const classEl = document.getElementById("pyqFilterClass");
+
+    if (boardEl) boardEl.value = activeBoard;
+    if (subjectEl) subjectEl.value = activeSubject;
+
+    if (classEl && activeBoard.toLowerCase().includes("anna")) {
+        classEl.value = "College";
     }
 
-    const container = document.getElementById("pyqListContainer");
-    if (!container) return;
-
-    container.innerHTML = `<div class="text-center p-4"><span class="spinner-border text-primary"></span><p class="mt-2 text-muted">Loading ${board} previous year questions...</p></div>`;
-
-    try {
-        const res = await fetch(`${API_BASE}/api/previous-year-questions?university=${encodeURIComponent(board)}&subject=${encodeURIComponent(subject)}`);
-        const data = await res.json();
-
-        if (data.success && data.questions) {
-            container.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5>📋 ${board} Exam Questions (${data.total_found})</h5>
-                    <span class="badge bg-primary">${data.years_available.join(", ")}</span>
-                </div>
-                <div class="list-group">
-                    ${data.questions.map(q => `
-                        <div class="list-group-item p-3 mb-2 rounded border">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <span class="badge bg-primary-subtle text-primary me-1">${q.marks} Marks</span>
-                                    <span class="badge bg-secondary me-1">Unit ${q.unit}</span>
-                                    <span class="badge bg-dark">${q.year}</span>
-                                    <h6 class="mt-2 mb-1">${q.question}</h6>
-                                </div>
-                                <button class="btn btn-sm btn-outline-primary" onclick="solvePYQWithAI('${encodeURIComponent(q.question)}', ${q.marks})">
-                                    Solve with AI
-                                </button>
-                            </div>
-                            <div class="p-2 mt-2 bg-light rounded small text-muted">
-                                💡 <strong>Solution Outline:</strong> ${q.solution_summary}
-                            </div>
-                        </div>
-                    `).join("")}
-                </div>
-            `;
-        }
-    } catch (e) {
-        container.innerHTML = `<div class="alert alert-danger">Could not load PYQs from backend.</div>`;
-    }
+    await searchSchoolPYQPapers();
 }
 
 async function searchSchoolPYQPapers() {
@@ -1504,8 +1464,13 @@ async function searchSchoolPYQPapers() {
     const yearEl = document.getElementById("pyqFilterYear");
     const mediumEl = document.getElementById("pyqFilterMedium");
 
-    const board = boardEl ? boardEl.value : "Tamil Nadu State Board";
-    const classLevel = classEl ? classEl.value : "10";
+    const board = boardEl ? boardEl.value : "Anna University";
+    let classLevel = classEl ? classEl.value : "College";
+    if (board.toLowerCase().includes("anna") && classLevel === "10") {
+        classLevel = "College";
+        if (classEl) classEl.value = "College";
+    }
+
     const subject = subjectEl && subjectEl.value.trim() ? subjectEl.value.trim() : "Mathematics";
     const year = yearEl ? yearEl.value : "";
     const medium = mediumEl ? mediumEl.value : "English";

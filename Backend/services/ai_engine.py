@@ -205,38 +205,7 @@ class AIEngine:
         """
         lang = self._normalize_lang(language)
 
-        # 0. Check syllabus boundaries if subject folder is specified
-        if subject and subject.lower().strip() not in ["general", "all", "general ai"]:
-            from services.syllabus_service import syllabus_service
-            syll_check = syllabus_service.check_topic(topic, subject, username)
-            if syll_check.get("is_out_of_syllabus"):
-                action = syll_check.get("action")
-                target_folder = syll_check.get("folder_name")
-                curr_subj = syll_check.get("current_subject") or subject
-                
-                msg_text = "This topic is not available in your selected syllabus or uploaded learning materials."
-                
-                return {
-                    "success": True,
-                    "status": "out_of_syllabus",
-                    "is_out_of_syllabus": True,
-                    "allow_general_ai": True,
-                    "message": msg_text,
-                    "syllabus_check": syll_check,
-                    "topic": topic,
-                    "marks": None,
-                    "unit": 0,
-                    "unit_title": "Out of Syllabus",
-                    "subject": curr_subj,
-                    "reference": "Out of Syllabus Alert",
-                    "language": lang,
-                    "answer": f"⚠️ OUT OF SYLLABUS ALERT\n\n{msg_text}",
-                    "action": action,
-                    "folder_name": target_folder,
-                    "folder_key": syll_check.get("folder_key"),
-                    "sources": []
-                }
-
+        # Detect unit and subject metadata
         unit_meta = self.detect_subject_and_unit(topic, subject)
         curriculum_entry = self._match_curriculum(topic)
 
