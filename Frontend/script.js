@@ -1017,42 +1017,20 @@ function appendChatMessage(sender, text, meta, topic) {
         }
     }
 
-    const formattedText = isOut
-        ? `⚠️ <strong>OUT OF SYLLABUS ALERT</strong><br><br>This topic is not available in your selected syllabus or uploaded learning materials.`
-        : text.replace(/\n/g, "<br>");
+    const formattedText = text ? text.replace(/\n/g, "<br>") : "";
     const speakerId = "spk_" + Date.now() + "_" + Math.random().toString(36).slice(2,6);
 
     let markOptionsHtml = "";
     if (sender === "ai") {
-        if (isOut) {
-            markOptionsHtml = `
-                <div class="out-of-syllabus-alert mt-3 p-3 rounded-3 border border-warning bg-body shadow-sm">
-                    <div class="d-flex align-items-center gap-2 mb-2 text-danger fw-bold fs-6">
-                        <i class="bi bi-exclamation-triangle-fill fs-5"></i> OUT OF SYLLABUS ALERT
-                    </div>
-                    <p class="mb-3 text-dark small fw-medium">
-                        This topic is not available in your selected syllabus or uploaded learning materials.
-                    </p>
-                    <div class="d-flex flex-wrap gap-2">
-                        <button type="button" class="btn btn-secondary btn-sm fw-bold rounded-pill px-3 shadow-sm" onclick="stayInSyllabus()">
-                            <i class="bi bi-arrow-left-circle me-1"></i> Go Back to Syllabus
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm fw-bold rounded-pill px-3 shadow-sm" onclick="askGeneralAiForTopic('${queryTopic.replace(/'/g, "\\'")}')">
-                            <i class="bi bi-stars me-1"></i> Ask General AI
-                        </button>
-                    </div>
-                </div>
-            `;
-        } else {
-            const currentMark = (meta && meta.marks) ? Number(meta.marks) : null;
-            const availableMarks = [1, 2, 4, 5, 8, 16];
-            const buttonsHtml = availableMarks.map(m => {
-                const isActive = currentMark === m;
-                const btnClass = isActive ? "btn-primary active fw-bold" : "btn-outline-primary";
-                return `<button type="button" class="btn btn-sm ${btnClass} mark-pill-btn" data-marks="${m}">${m} ${m === 1 ? 'Mark' : 'Marks'}</button>`;
-            }).join(" ");
+        const currentMark = (meta && meta.marks) ? Number(meta.marks) : null;
+        const availableMarks = [1, 2, 4, 5, 8, 16];
+        const buttonsHtml = availableMarks.map(m => {
+            const isActive = currentMark === m;
+            const btnClass = isActive ? "btn-primary active fw-bold" : "btn-outline-primary";
+            return `<button type="button" class="btn btn-sm ${btnClass} mark-pill-btn" data-marks="${m}">${m} ${m === 1 ? 'Mark' : 'Marks'}</button>`;
+        }).join(" ");
 
-            let referThisBox = "";
+        let referThisBox = "";
             if (meta) {
                 const bookTitle = meta.book || (meta.sources && meta.sources[0] ? meta.sources[0].book : null);
                 const chapterTitle = meta.chapter || meta.unit_title || (meta.sources && meta.sources[0] ? meta.sources[0].chapter : null);
