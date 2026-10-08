@@ -20,7 +20,7 @@ def main():
         print(f"[*] PRODUCTION mode — Binding to {host}:{port}")
     else:
         # LOCAL DEV: try ports 8000, 8001, 8080
-        host = "127.0.0.1"
+        host = "0.0.0.0"
         reload = True
         port = 8000
         for p in [8000, 8001, 8080, 3001]:
@@ -30,9 +30,9 @@ def main():
             else:
                 print(f"[!] Port {p} is busy, trying next...")
 
-        print(f"[*] LOCAL DEV mode — Launching on http://{host}:{port}")
-        print(f"[*] Frontend (served by FastAPI): http://{host}:{port}/app/")
-        print(f"[*] API Docs: http://{host}:{port}/docs")
+        print(f"[*] LOCAL DEV mode — Launching on http://0.0.0.0:{port}")
+        print(f"[*] Frontend: http://localhost:{port}/app/")
+        print(f"[*] API Docs: http://localhost:{port}/docs")
 
     uvicorn.run(
         "main:app",

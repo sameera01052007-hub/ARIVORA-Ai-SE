@@ -62,23 +62,13 @@ class DocumentService:
 
         current_unit = None
         total_extracted_chars = 0
+        max_pages = min(total_pages, 150)
 
-        for page_idx in range(total_pages):
+        for page_idx in range(max_pages):
             page_num = page_idx + 1
             page = doc[page_idx]
             text = page.get_text("text") or ""
             cleaned = self._clean_text(text)
-
-            # OCR Fallback for scanned PDF page if text is empty
-            if len(cleaned) < 20 and HAS_OCR:
-                try:
-                    pix = page.get_pixmap(dpi=150)
-                    img_bytes = pix.tobytes("png")
-                    img = Image.open(io.BytesIO(img_bytes))
-                    ocr_text = pytesseract.image_to_string(img)
-                    cleaned = self._clean_text(ocr_text)
-                except Exception:
-                    pass
 
             total_extracted_chars += len(cleaned)
 
@@ -109,17 +99,17 @@ class DocumentService:
 
             pages_data.append({
                 "page": page_num,
-                "text": cleaned[:4000],
+                "text": cleaned[:2000],
                 "char_count": len(cleaned),
                 "unit": unit_id,
                 "chapter": chap_name
             })
 
-            # Semantic chunking (approx 500 chars per chunk with overlap)
+            # Fast Semantic chunking (~250 words per chunk)
             if len(cleaned) > 50:
                 words = cleaned.split()
-                chunk_size = 80
-                overlap = 20
+                chunk_size = 200
+                overlap = 30
                 for i in range(0, len(words), chunk_size - overlap):
                     chunk_words = words[i:i + chunk_size]
                     if len(chunk_words) < 10:
@@ -157,7 +147,7 @@ class DocumentService:
             "chunks": chunks_data
         }
 
-        # Save index to disk
+        # Save index to disk fast without indent formatting overhead
         safe_user = re.sub(r"[^a-zA-Z0-9_-]", "_", username)
         safe_subj = re.sub(r"[^a-zA-Z0-9_-]", "_", subject)
         safe_stem = re.sub(r"[^a-zA-Z0-9_-]", "_", file_path.stem)
@@ -165,7 +155,7 @@ class DocumentService:
         
         index_file = self.index_dir / f"{safe_base}.json"
         with open(index_file, "w", encoding="utf-8") as f:
-            json.dump(index_record, f, ensure_ascii=False, indent=2)
+            json.dump(index_record, f, ensure_ascii=False)
 
         return index_record
 
