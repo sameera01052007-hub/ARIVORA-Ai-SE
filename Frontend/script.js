@@ -6,25 +6,48 @@
 
 "use strict";
 
-// Auto-detect backend URL: works seamlessly locally (Live Server :5500, file://, etc.) AND in production (Render, Railway, etc.)
+const RENDER_BACKEND_URL = "https://arivora-ai-se.onrender.com";
+
 const API_BASE = (() => {
-    // 1. Meta tag override (for custom hosted deployments where frontend & backend have different domains)
     const meta = document.querySelector('meta[name="backend-url"]');
     if (meta && meta.content && meta.content.trim()) return meta.content.replace(/\/$/, "");
 
-    // 2. Local dev check: if running from file:// or local dev server (e.g., Live Server on 5500, Vite on 5173, etc. not 8000)
     const origin = window.location.origin || "";
     const hostname = window.location.hostname;
     const port = window.location.port;
 
     if (window.location.protocol === "file:" || 
         ((hostname === "localhost" || hostname === "127.0.0.1" || hostname === "") && port !== "8000")) {
-        return "http://127.0.0.1:8000";
+        return RENDER_BACKEND_URL;
     }
 
-    // 3. Otherwise served from FastAPI backend (port 8000) or hosted online (Render, Railway, etc.)
-    return origin;
+    return origin || RENDER_BACKEND_URL;
 })();
+
+async function safeApiFetch(endpointPath, options = {}) {
+    try {
+        const primaryUrl = `${API_BASE}${endpointPath.startsWith("/") ? "" : "/"}${endpointPath}`;
+        const res = await fetch(primaryUrl, options);
+        if (res.ok || res.status < 500) {
+            return await res.json();
+        }
+    } catch (err) {
+        console.warn("[ARIVORA AI] Primary API_BASE failed, trying Render backup...", err);
+    }
+
+    if (API_BASE !== RENDER_BACKEND_URL) {
+        try {
+            const fallbackUrl = `${RENDER_BACKEND_URL}${endpointPath.startsWith("/") ? "" : "/"}${endpointPath}`;
+            const resFallback = await fetch(fallbackUrl, options);
+            if (resFallback.ok || resFallback.status < 500) {
+                return await resFallback.json();
+            }
+        } catch (errFallback) {
+            console.error("[ARIVORA AI] Fallback API failed:", errFallback);
+        }
+    }
+    throw new Error("Unable to connect to backend server.");
+}
 
 
 
@@ -1494,8 +1517,7 @@ async function searchSchoolPYQPapers() {
         });
         if (year) queryParams.append("year", year);
 
-        const res = await fetch(`${API_BASE}/api/school/pyq-search?${queryParams.toString()}`);
-        const data = await res.json();
+        const data = await safeApiFetch(`/api/school/pyq-search?${queryParams.toString()}`);
 
         if (data.success && data.questions && data.questions.length > 0) {
             container.innerHTML = `
